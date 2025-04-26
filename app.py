@@ -136,7 +136,7 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     chart = BarChart()
     chart.type = "bar" if muitas_categorias else "col"
     chart.style = 10
-   chart.x_axis.title = tag_base  # Título eixo X
+    chart.x_axis.title = tag_base  # Título eixo X
     chart.y_axis.title = "Contagem"  # Título eixo Y
     chart.x_axis.tickLblPos = 'low'  # Posiciona rótulos
     chart.x_axis.visible = True
