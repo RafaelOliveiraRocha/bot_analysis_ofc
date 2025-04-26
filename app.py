@@ -11,6 +11,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.chart import BarChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
+from openpyxl.chart.axis import XAxis, YAxis
 DIAS_SEMANA = {
     0: 'Segunda-feira',
     1: 'Terça-feira',
@@ -135,12 +136,9 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     chart = BarChart()
     chart.type = "bar" if muitas_categorias else "col"
     chart.style = 10
-    chart.x_axis.visible = True
-    chart.y_axis.visible = True
-    chart.title = f"Distribuição de {tag_base}"
-    chart.x_axis.title = tag_base
-    chart.y_axis.title = "Contagem"
-    chart.height = 15
+    chart.x_axis = XAxis(axId=100, title=tag_base)
+    chart.y_axis = YAxis(axId=200, title="Contagem")
+    chart.title = None
     chart.width = 20
     num_categorias = len(tabela_dados)
     num_colunas = len(colunas_valores)
@@ -519,4 +517,4 @@ with tabs[2]:
 
 # Rodapé
 st.markdown("---")
-st.markdown("📊 **WhatsApp Bot Analytics** | Hi Platform | R.R")
+st.markdown("📊 **WhatsApp Bot Analytics** | R.R")
