@@ -135,9 +135,11 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     chart = BarChart()
     chart.type = "bar" if muitas_categorias else "col"
     chart.style = 10
+    chart.x_axis.visible = True
+    chart.y_axis.visible = True
     chart.title = f"Distribuição de {tag_base}"
-    chart.x_axis.title = ""
-    chart.y_axis.title = ""
+    chart.x_axis.title = tag_base
+    chart.y_axis.title = "Contagem"
     chart.height = 15
     chart.width = 20
     num_categorias = len(tabela_dados)
