@@ -11,8 +11,21 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.chart import BarChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
-import locale
-locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+DIAS_SEMANA = {
+    0: 'Segunda-feira',
+    1: 'Terça-feira',
+    2: 'Quarta-feira',
+    3: 'Quinta-feira',
+    4: 'Sexta-feira',
+    5: 'Sábado',
+    6: 'Domingo'
+}
+
+MESES_ABREV = {
+    1: 'jan', 2: 'fev', 3: 'mar', 4: 'abr', 5: 'mai', 6: 'jun',
+    7: 'jul', 8: 'ago', 9: 'set', 10: 'out', 11: 'nov', 12: 'dez'
+}
+
 
 # Configurar página do Streamlit
 st.set_page_config(page_title="WhatsApp Bot Analytics", layout="wide")
@@ -56,13 +69,8 @@ def processar_arquivos_csv(arquivos_uploaded, nome_base_saida):
     # Tratamentos iniciais
     df["Data"] = pd.to_datetime(df["Data"], errors="coerce", dayfirst=True)
     df["Hora"] = df["Data"].dt.strftime("%H")
-    df["Dia da Semana"] = df["Data"].dt.day_name(locale='pt_BR.utf8')
-    df["Período"] = df["Data"].dt.strftime("%b/%y").str.lower()
-    
-    df["Período"] = df["Período"].str.replace("jan", "jan").str.replace("feb", "fev").str.replace("mar", "mar")\
-                                .str.replace("apr", "abr").str.replace("may", "mai").str.replace("jun", "jun")\
-                                .str.replace("jul", "jul").str.replace("aug", "ago").str.replace("sep", "set")\
-                                .str.replace("oct", "out").str.replace("nov", "nov").str.replace("dec", "dez")
+    df["Dia da Semana"] = df["Data"].dt.dayofweek.map(DIAS_SEMANA)
+    df["Período"] = df["Data"].dt.month.map(MESES_ABREV) + "/" + df["Data"].dt.strftime("%y")
     
     def obter_trimestre(data):
         if pd.isna(data):
