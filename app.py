@@ -151,26 +151,20 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     
     chart.title = None
     
-    # Ajustar largura e altura do gráfico para evitar problemas com a legenda
-    chart.width = 25  # Aumentar a largura
-    chart.height = 15  # Definir altura explicitamente
+    # Aumentar largura para evitar problemas de legenda
+    chart.width = 25
+    chart.height = 15
     
-    # Mover a legenda para a direita do gráfico (fora da área de plotagem)
+    # Mover legenda para fora da área do gráfico
     chart.legend.position = 'r'
     chart.legend.overlay = False
     
     num_categorias = len(tabela_dados)
     num_colunas = len(colunas_valores)
     
-    # Dados para o gráfico
-    if len(tabela_dados.columns) > 2:  # Se for segmentado
-        data = Reference(ws, min_col=inicio_coluna+1, max_col=inicio_coluna+num_colunas, 
-                        min_row=inicio_linha, max_row=inicio_linha+num_categorias)
-    else:  # Se não for segmentado, use apenas a coluna de contagem
-        data = Reference(ws, min_col=inicio_coluna+1, max_col=inicio_coluna+1, 
-                        min_row=inicio_linha, max_row=inicio_linha+num_categorias)
-        # Neste caso, vamos esconder a legenda já que só temos uma série
-        chart.legend.position = 'none'
+    # Dados para o gráfico - mantendo a lógica original
+    data = Reference(ws, min_col=inicio_coluna+1, max_col=inicio_coluna+num_colunas, 
+                     min_row=inicio_linha, max_row=inicio_linha+num_categorias)
     
     # Categorias (eixo x)
     categorias = Reference(ws, min_col=inicio_coluna, max_col=inicio_coluna,
