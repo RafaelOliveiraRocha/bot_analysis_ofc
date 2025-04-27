@@ -138,29 +138,43 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     chart.style = 10
     
     # Remover títulos dos eixos
-    chart.x_axis.title = None  # Remove título do eixo X
-    chart.y_axis.title = None  # Remove título do eixo Y
-    chart.x_axis.tickLblPos = 'low'  # Posiciona rótulos
+    chart.x_axis.title = None
+    chart.y_axis.title = None
+    chart.x_axis.tickLblPos = 'low'
     
     # Forçar a exibição dos eixos, mas sem linhas de grade
     from openpyxl.chart.axis import ChartLines
-    chart.x_axis.majorGridlines = None  # Remove linhas de grade do eixo X
-    chart.y_axis.majorGridlines = None  # Remove linhas de grade do eixo Y
+    chart.x_axis.majorGridlines = None
+    chart.y_axis.majorGridlines = None
     chart.x_axis.delete = False
     chart.y_axis.delete = False
     
     chart.title = None
-    chart.width = 20
+    
+    # Ajustar largura e altura do gráfico para evitar problemas com a legenda
+    chart.width = 25  # Aumentar a largura
+    chart.height = 15  # Definir altura explicitamente
+    
+    # Mover a legenda para a direita do gráfico (fora da área de plotagem)
+    chart.legend.position = 'r'
+    chart.legend.overlay = False
+    
     num_categorias = len(tabela_dados)
     num_colunas = len(colunas_valores)
     
     # Dados para o gráfico
-    data = Reference(ws, min_col=inicio_coluna+1, max_col=inicio_coluna+num_colunas, 
-                     min_row=inicio_linha, max_row=inicio_linha+num_categorias)
+    if len(tabela_dados.columns) > 2:  # Se for segmentado
+        data = Reference(ws, min_col=inicio_coluna+1, max_col=inicio_coluna+num_colunas, 
+                        min_row=inicio_linha, max_row=inicio_linha+num_categorias)
+    else:  # Se não for segmentado, use apenas a coluna de contagem
+        data = Reference(ws, min_col=inicio_coluna+1, max_col=inicio_coluna+1, 
+                        min_row=inicio_linha, max_row=inicio_linha+num_categorias)
+        # Neste caso, vamos esconder a legenda já que só temos uma série
+        chart.legend.position = 'none'
     
     # Categorias (eixo x)
     categorias = Reference(ws, min_col=inicio_coluna, max_col=inicio_coluna,
-                            min_row=inicio_linha+1, max_row=inicio_linha+num_categorias)
+                          min_row=inicio_linha+1, max_row=inicio_linha+num_categorias)
     
     # Adiciona dados ao gráfico
     chart.add_data(data, titles_from_data=True)
