@@ -129,20 +129,35 @@ def processar_arquivos_csv(arquivos_uploaded, nome_base_saida):
     
     return df, df_resultados, tags
 
-# FUNÇÃO PARA CRIAR GRÁFICOS NATIVOS DO EXCEL
+
 # FUNÇÃO PARA CRIAR GRÁFICOS NATIVOS DO EXCEL
 def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_coluna, tabela_dados):
     muitas_categorias = len(tabela_dados) > 6
     chart = BarChart()
     chart.type = "bar" if muitas_categorias else "col"
     chart.style = 10
-    chart.x_axis.title = tag_base  # Título eixo X
-    chart.y_axis.title = "Contagem"  # Título eixo Y
-    chart.x_axis.tickLblPos = 'low'  # Posiciona rótulos
+    chart.x_axis.title = tag_base
+    chart.y_axis.title = "Contagem"
+    chart.x_axis.tickLblPos = 'low'
+    
+    # Garantir que eixos sejam visíveis e configurados corretamente
     chart.x_axis.visible = True
     chart.y_axis.visible = True
+    chart.x_axis.majorGridlines = None
+    chart.y_axis.majorGridlines = True
+    chart.y_axis.minorGridlines = None
+    chart.y_axis.crosses = "autoZero"
+    chart.y_axis.axPos = "l"  # Posição do eixo Y à esquerda
+    chart.x_axis.axPos = "b"  # Posição do eixo X embaixo
+    
+    # Configuração para mostrar linha do eixo
+    chart.x_axis.majorTickMark = "out"
+    chart.y_axis.majorTickMark = "out"
+    
     chart.title = None
     chart.width = 20
+    chart.height = 15  # Ajustado para dar mais espaço para o eixo
+    
     num_categorias = len(tabela_dados)
     num_colunas = len(colunas_valores)
     
@@ -176,7 +191,6 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     ws.add_chart(chart, celula_grafico)
     
     return 20  # Valor fixo para espaçamento mais consistente
-
 
 # FUNÇÃO PARA SALVAR NO EXCEL E CRIAR GRÁFICOS
 def salvar_no_excel(df, df_resultados, tabelas, tags_base):
