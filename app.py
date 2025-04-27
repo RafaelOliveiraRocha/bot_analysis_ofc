@@ -136,14 +136,16 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     chart = BarChart()
     chart.type = "bar" if muitas_categorias else "col"
     chart.style = 10
-    chart.x_axis.title = tag_base  # Título eixo X
-    chart.y_axis.title = "Contagem"  # Título eixo Y
+    
+    # Remover títulos dos eixos
+    chart.x_axis.title = None  # Remove título do eixo X
+    chart.y_axis.title = None  # Remove título do eixo Y
     chart.x_axis.tickLblPos = 'low'  # Posiciona rótulos
     
-    # Forçar a exibição dos eixos
+    # Forçar a exibição dos eixos, mas sem linhas de grade
     from openpyxl.chart.axis import ChartLines
-    chart.x_axis.majorGridlines = ChartLines()
-    chart.y_axis.majorGridlines = ChartLines()
+    chart.x_axis.majorGridlines = None  # Remove linhas de grade do eixo X
+    chart.y_axis.majorGridlines = None  # Remove linhas de grade do eixo Y
     chart.x_axis.delete = False
     chart.y_axis.delete = False
     
