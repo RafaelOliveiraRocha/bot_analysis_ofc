@@ -136,28 +136,19 @@ def criar_grafico_excel(ws, tag_base, colunas_valores, inicio_linha, inicio_colu
     chart = BarChart()
     chart.type = "bar" if muitas_categorias else "col"
     chart.style = 10
-    chart.x_axis.title = tag_base
-    chart.y_axis.title = "Contagem"
-    chart.x_axis.tickLblPos = 'low'
+    chart.x_axis.title = tag_base  # Título eixo X
+    chart.y_axis.title = "Contagem"  # Título eixo Y
+    chart.x_axis.tickLblPos = 'low'  # Posiciona rótulos
     
-    # Garantir que eixos sejam visíveis e configurados corretamente
-    chart.x_axis.visible = True
-    chart.y_axis.visible = True
-    chart.x_axis.majorGridlines = None
-    chart.y_axis.majorGridlines = True
-    chart.y_axis.minorGridlines = None
-    chart.y_axis.crosses = "autoZero"
-    chart.y_axis.axPos = "l"  # Posição do eixo Y à esquerda
-    chart.x_axis.axPos = "b"  # Posição do eixo X embaixo
-    
-    # Configuração para mostrar linha do eixo
-    chart.x_axis.majorTickMark = "out"
-    chart.y_axis.majorTickMark = "out"
+    # Forçar a exibição dos eixos
+    from openpyxl.chart.axis import ChartLines
+    chart.x_axis.majorGridlines = ChartLines()
+    chart.y_axis.majorGridlines = ChartLines()
+    chart.x_axis.delete = False
+    chart.y_axis.delete = False
     
     chart.title = None
     chart.width = 20
-    chart.height = 15  # Ajustado para dar mais espaço para o eixo
-    
     num_categorias = len(tabela_dados)
     num_colunas = len(colunas_valores)
     
