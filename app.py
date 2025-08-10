@@ -334,7 +334,7 @@ with tabs[0]:
                                      accept_multiple_files=True)
     
     nome_base_saida = st.text_input("Nome do arquivo de saída (sem extensão)", 
-                                   value="tena_bot_wpp_tratado")
+                                   value="bot_wpp_tratado")
     
     arquivo_saida = f"{nome_base_saida}.xlsx"
     
@@ -535,4 +535,5 @@ with tabs[2]:
 
 # Rodapé
 st.markdown("---")
+
 st.markdown("📊 **WhatsApp Bot Analytics** | R.R")
