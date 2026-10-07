@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-import os
+import altair as alt
 import re
+from hashlib import sha256
 from datetime import datetime
 from io import BytesIO
 import base64
@@ -51,17 +52,9 @@ def processar_arquivos_csv(arquivos_uploaded, nome_base_saida):
     dfs = []
     
     for arquivo_uploaded in arquivos_uploaded:
-        # Salvar o arquivo temporário
-        bytes_data = arquivo_uploaded.read()
-        with open(arquivo_uploaded.name, "wb") as f:
-            f.write(bytes_data)
-        
-        # Ler o CSV
-        df_temp = pd.read_csv(arquivo_uploaded.name, encoding="latin1", sep=";")
+        # Ler em memória sem sobrescrever arquivos locais ou consumir o upload.
+        df_temp = pd.read_csv(BytesIO(arquivo_uploaded.getvalue()), encoding="latin1", sep=";")
         dfs.append(df_temp)
-        
-        # Remover o arquivo temporário
-        os.remove(arquivo_uploaded.name)
     
     # Concatenar DataFrames
     df = pd.concat(dfs, ignore_index=True) if len(dfs) > 1 else dfs[0]
@@ -240,7 +233,7 @@ def salvar_no_excel(df, df_resultados, tabelas, tags_base):
         # Verifica se a coluna tag_base existe no DataFrame
         if tag_base in tabela.columns:
             df_sem_total = tabela.copy()
-            df_sem_total = df_sem_total[~df_sem_total[tag_base].astype(str).str.contains("TOTAL", case=False, na=False)]
+            df_sem_total = df_sem_total[df_sem_total[tag_base] != "TOTAL"]
 
             colunas_a_manter = [tag_base]
             for coluna in df_sem_total.columns:
@@ -267,7 +260,7 @@ def salvar_no_excel(df, df_resultados, tabelas, tags_base):
                         cell.alignment = Alignment(horizontal='center')
                     
                     # Destaca linha de total
-                    if r_idx > 0 and "TOTAL" in str(row[0]):
+                    if r_idx > 0 and row[0] == "TOTAL":
                         cell.font = Font(bold=True)
                         cell.fill = PatternFill(start_color="EEEEEE", fill_type="solid")
                     
@@ -315,10 +308,22 @@ def salvar_no_excel(df, df_resultados, tabelas, tags_base):
 
 # Função para gerar link de download
 def get_binary_file_downloader_html(bin_file, file_label='Arquivo'):
-    data = bin_file.read()
+    data = bin_file.getvalue()
     b64 = base64.b64encode(data).decode()
     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{file_label}">📥 Baixar {file_label}</a>'
     return href
+
+
+def limpar_exportacao():
+    for chave in ('excel_bytes', 'download_ready'):
+        st.session_state.pop(chave, None)
+
+
+def limpar_resultados():
+    limpar_exportacao()
+    for chave in ('df', 'df_resultados', 'tags', 'nome_arquivo', 'analises',
+                  'nova_tag', 'nova_col_valores', 'nova_segmentar', 'nova_col_segmento'):
+        st.session_state.pop(chave, None)
 
 # Interface principal
 tabs = st.tabs(["Upload de Arquivos", "Análise de Dados", "Visualização de Resultados"])
@@ -332,6 +337,15 @@ with tabs[0]:
     uploaded_files = st.file_uploader("Selecione os arquivos CSV", 
                                      type=["csv"], 
                                      accept_multiple_files=True)
+
+    # O conteúdo também identifica a entrada: nomes iguais podem ter dados diferentes.
+    assinatura_uploads = tuple(
+        (arquivo.name, sha256(arquivo.getvalue()).hexdigest())
+        for arquivo in (uploaded_files or [])
+    )
+    if st.session_state.get('assinatura_uploads') != assinatura_uploads:
+        limpar_resultados()
+        st.session_state['assinatura_uploads'] = assinatura_uploads
     
     nome_base_saida = st.text_input("Nome do arquivo de saída (sem extensão)", 
                                    value="bot_wpp_tratado")
@@ -345,6 +359,7 @@ with tabs[0]:
             with st.spinner("Processando arquivos..."):
                 # Armazenar os DataFrames na sessão
                 df, df_resultados, tags = processar_arquivos_csv(uploaded_files, nome_base_saida)
+                limpar_resultados()
                 
                 # Armazenar na sessão
                 st.session_state['df'] = df
@@ -438,6 +453,7 @@ with tabs[1]:
                 }
                 
                 st.session_state['analises'].append(analise)
+                limpar_exportacao()
                 st.success(f"✅ Análise para {tag_base} adicionada!")
         
         # Listagem das análises já configuradas
@@ -457,6 +473,7 @@ with tabs[1]:
                     
                     if st.button("Remover", key=f"remover_{i}"):
                         st.session_state['analises'].pop(i)
+                        limpar_exportacao()
                         st.rerun()
             
             if st.button("Gerar Excel com Análises", key="gerar_excel"):
@@ -502,6 +519,10 @@ with tabs[2]:
         - Aba **U.U e Rec**: Análise de usuários únicos e taxa de recontato
         - Aba **resumo**: Tabelas e gráficos das análises configuradas
         """)
+        st.caption(
+            "Taxa de recontato: atendimentos adicionais por usuário no mês. "
+            "Com 5 atendimentos e 2 usuários, 150% equivale a 1,5 atendimento adicional por usuário."
+        )
         
         # Visualizar análises
         st.subheader("Resumo das Análises")
@@ -519,19 +540,32 @@ with tabs[2]:
                 
                 # Gerar visualização simplificada
                 df_chart = analise['tabela'].copy()
-                if "TOTAL" in df_chart[analise['tag_base']].values:
-                    df_chart = df_chart[df_chart[analise['tag_base']] != "TOTAL"]
+                df_chart = df_chart[df_chart[analise['tag_base']] != "TOTAL"]
+                df_chart = df_chart.drop(columns="TOTAL", errors="ignore")
                 
                 # Simplificar para visualização
                 if len(df_chart) > 1:
                     st.write("**Visualização:**")
                     
-                    if analise['segmentado']:
-                        st.bar_chart(df_chart.set_index(analise['tag_base']))
-                    else:
-                        # Remover a coluna TOTAL se existir
-                        cols_to_plot = [col for col in df_chart.columns if col != analise['tag_base']]
-                        st.bar_chart(df_chart.set_index(analise['tag_base'])[cols_to_plot])
+                    dados_grafico = df_chart.melt(
+                        id_vars=[analise['tag_base']], var_name="Série", value_name="Contagem"
+                    )
+                    grafico = alt.Chart(dados_grafico).mark_bar().encode(
+                        x=alt.X(
+                            field=analise['tag_base'], type="nominal",
+                            sort=df_chart[analise['tag_base']].tolist(),
+                            axis=alt.Axis(labelAngle=0, labelLimit=500, labelOverlap=False),
+                        ),
+                        y=alt.Y("Contagem:Q", stack="zero", axis=alt.Axis(tickMinStep=1)),
+                        color=alt.Color(
+                            "Série:N",
+                            title=analise['col_segmento'] if analise['segmentado'] else None,
+                            legend=alt.Legend(orient="top", labelLimit=400)
+                            if analise['segmentado'] else None,
+                        ),
+                        tooltip=[analise['tag_base'], "Série:N", "Contagem:Q"],
+                    ).properties(height=320)
+                    st.altair_chart(grafico, use_container_width=True)
 
 # Rodapé
 st.markdown("---")

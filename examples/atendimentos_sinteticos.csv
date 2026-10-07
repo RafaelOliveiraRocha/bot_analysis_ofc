@@ -1,0 +1,10 @@
+Id. Atendimento;Data;Identificação;Propriedades
+AT-SIM-001;05/01/2025 09:00:00;usuario-sintetico-01;tag_motivo:dúvida | tag_status:resolvido |
+AT-SIM-002;05/01/2025 10:00:00;usuario-sintetico-01;tag_motivo:pedido | tag_status:pendente |
+AT-SIM-003;06/01/2025 11:00:00;usuario-sintetico-01;tag_motivo:pedido | tag_status:resolvido |
+AT-SIM-004;07/01/2025 12:00:00;usuario-sintetico-02;tag_motivo:dúvida | tag_status:resolvido |
+AT-SIM-005;08/01/2025 13:00:00;usuario-sintetico-02;tag_motivo:pedido | tag_status:pendente |
+AT-SIM-006;02/02/2025 10:00:00;usuario-sintetico-01;tag_motivo:pedido | tag_status:resolvido |
+AT-SIM-007;03/02/2025 11:00:00;usuario-sintetico-03;tag_motivo:dúvida | tag_status:pendente |
+AT-SIM-008;04/02/2025 12:00:00;usuario-sintetico-03;tag_motivo:dúvida | tag_status:resolvido |
+AT-SIM-003;06/01/2025 11:00:00;usuario-sintetico-01;tag_motivo:pedido | tag_status:resolvido |
