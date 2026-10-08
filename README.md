@@ -20,7 +20,7 @@ O projeto tem registros de desenvolvimento em abril e agosto de 2025. O exemplo 
 
 ## Instalação e execução
 
-Requisitos: Python, `venv` e `pip`. A interface usa Streamlit e Altair; o tratamento dos dados usa pandas, e a exportação usa openpyxl. Ambiente verificado no Linux: **Python 3.10.12, Streamlit 1.65.0, Altair 6.2.2, pandas 2.3.3 e openpyxl 3.1.5**. Instale as dependências declaradas em `requirements.txt`.
+Requisitos: Python, `venv` e `pip`. A interface usa Streamlit e Altair; o tratamento dos dados usa pandas, e a exportação usa openpyxl. Ambiente de referência no Linux: **Python 3.10.12, Streamlit 1.65.0, Altair 6.2.2, pandas 2.3.3 e openpyxl 3.1.5**. Instale as dependências declaradas em `requirements.txt`.
 
 Na raiz do projeto, em um terminal Bash:
 
@@ -46,7 +46,7 @@ O arquivo [examples/atendimentos_sinteticos.csv](examples/atendimentos_sintetico
 5. Clique em **Adicionar Análise**, depois em **Gerar Excel com Análises**.
 6. Na aba **Visualização de Resultados**, confira a tabela e baixe o Excel. Abra-o em um editor de planilhas compatível com `.xlsx`.
 
-O [Excel de referência](examples/bot_analytics_sintetico.xlsx) foi gerado pela aplicação com essa configuração. Ele permite comparar os resultados sem usar dados profissionais.
+O [Excel de referência](examples/bot_analytics_sintetico.xlsx) foi gerado pela aplicação com essa configuração. Ele permite comparar os valores com os resultados esperados abaixo.
 
 ### Resultados esperados
 
@@ -111,10 +111,10 @@ Os uploads são lidos em memória. Quando os arquivos mudam, inclusive com **nom
 - Identificações ausentes não são rejeitadas explicitamente e podem afetar a contagem de usuários únicos. Preencha os identificadores antes de importar os dados.
 - A última tag exige `|`; nomes, delimitadores e codificação seguem o contrato atual do CSV.
 - Os gráficos exibem as categorias e os segmentos, sem os agregados `TOTAL`. Quando a contagem usa identificadores presentes em vários segmentos, a soma das parcelas pode diferir do total distinto da tabela.
-- A captura foi feita na aplicação executando o exemplo. O Excel de referência foi gerado, baixado e lido com openpyxl; sua renderização em Excel/LibreOffice desktop não foi verificada.
-- Dependências têm limites mínimos, sem lockfile de ambiente. Compatibilidade de versões diferentes das verificadas não foi testada.
+- O Excel usa gráficos nativos de `.xlsx`; a aparência e a edição dependem do editor de planilhas. Use as tabelas de resultados esperados para conferir os valores.
+- As dependências têm limites mínimos, sem lockfile de ambiente; versões diferentes do ambiente de referência podem apresentar diferenças de compatibilidade.
 
-## Verificações locais
+## Testes
 
 Com o ambiente virtual ativo:
 
@@ -123,7 +123,7 @@ python -m pip check
 python -m unittest discover -s tests -v
 ```
 
-Os testes usam a API AppTest do Streamlit com uploads sintéticos. Conferem indicadores e tabelas, contagens do gráfico da interface, referências dos gráficos do Excel e preservação de categorias como `perda total`. Também verificam download após rerun, preservação de arquivo local, múltiplos uploads, troca de conteúdo com o mesmo nome e invalidação da exportação. A captura e o download são conferidos no navegador, com Chrome; Playwright é usado apenas na validação, sem integrar as dependências da aplicação.
+Os testes usam a API AppTest do Streamlit com uploads sintéticos. Conferem indicadores e tabelas, contagens do gráfico da interface, referências dos gráficos do Excel e preservação de categorias como `perda total`. Também verificam download após rerun, preservação de arquivo local, múltiplos uploads, troca de conteúdo com o mesmo nome e invalidação da exportação.
 
 ## Arquivos do projeto
 
