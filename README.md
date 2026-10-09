@@ -1,10 +1,14 @@
 # WhatsApp Bot Analytics
 
-Aplicação local em Streamlit para transformar CSVs de atendimentos de bots WhatsApp em indicadores mensais, contagens por tags e um relatório Excel com tabelas e gráficos editáveis.
+O Bot Analytics surgiu da necessidade de organizar exportações de atendimentos e reduzir a consolidação manual da análise mensal. A aplicação local em Streamlit reúne os CSVs, calcula indicadores e segmentações e gera um Excel com tabelas e gráficos editáveis.
 
-O fluxo começa em arquivos CSV: a aplicação não se conecta ao WhatsApp, não envia mensagens e não precisa de contas ou chaves de API para consultar o exemplo.
+**CSVs → deduplicação e extração de tags → indicadores e segmentações → Excel com tabelas e gráficos.**
 
 O projeto tem registros de desenvolvimento em abril e agosto de 2025. O exemplo incluído permite conhecer suas funcionalidades e reproduzir a análise com dados inteiramente sintéticos.
+
+Para conhecer a entrega antes de instalar, baixe o [Excel do exemplo sintético](examples/bot_analytics_sintetico.xlsx), gerado pela aplicação com a configuração descrita abaixo.
+
+![Aplicação executando o exemplo sintético](docs/images/bot-analytics-exemplo.png)
 
 ## Funcionalidades
 
@@ -16,11 +20,9 @@ O projeto tem registros de desenvolvimento em abril e agosto de 2025. O exemplo 
 - Configurar contagens de valores distintos por tag, com segmentação opcional por outra coluna.
 - Exportar os dados tratados, indicadores e análises para Excel, com filtros, tabelas formatadas e gráficos nativos.
 
-![Aplicação executando o exemplo sintético](docs/images/bot-analytics-exemplo.png)
-
 ## Instalação e execução
 
-Requisitos: Python, `venv` e `pip`. A interface usa Streamlit e Altair; o tratamento dos dados usa pandas, e a exportação usa openpyxl. Ambiente de referência no Linux: **Python 3.10.12, Streamlit 1.65.0, Altair 6.2.2, pandas 2.3.3 e openpyxl 3.1.5**. Instale as dependências declaradas em `requirements.txt`.
+Requisitos: Python, `venv` e `pip`. A interface usa Streamlit e Altair; o tratamento dos dados usa pandas, e a exportação usa openpyxl. Ambiente de referência no Linux: **Python 3.10.12, Streamlit 1.65.0, Altair 6.2.2, pandas 2.3.3 e openpyxl 3.1.5**. Instale as dependências declaradas em `requirements.txt`; o manifesto usa versões mínimas, sem fixar todo o ambiente.
 
 Na raiz do projeto, em um terminal Bash:
 
@@ -37,7 +39,7 @@ No PowerShell, a ativação equivalente é `.venv\Scripts\Activate.ps1`. As dema
 
 ## Executar o exemplo sintético
 
-O arquivo [examples/atendimentos_sinteticos.csv](examples/atendimentos_sinteticos.csv) contém **somente registros fictícios**, sem dados de clientes ou de operação. Ele já está no formato `latin1` com separador `;`. Um arquivo é suficiente para a demonstração.
+O arquivo [examples/atendimentos_sinteticos.csv](examples/atendimentos_sinteticos.csv) contém **somente registros fictícios** e usa `latin1` com separador `;`. Um arquivo é suficiente para a demonstração.
 
 1. Na aba **Upload de Arquivos**, selecione o CSV sintético.
 2. Em **Nome do arquivo de saída**, informe `bot_analytics_sintetico` e clique em **Processar Arquivos**.
@@ -46,7 +48,7 @@ O arquivo [examples/atendimentos_sinteticos.csv](examples/atendimentos_sintetico
 5. Clique em **Adicionar Análise**, depois em **Gerar Excel com Análises**.
 6. Na aba **Visualização de Resultados**, confira a tabela e baixe o Excel. Abra-o em um editor de planilhas compatível com `.xlsx`.
 
-O [Excel de referência](examples/bot_analytics_sintetico.xlsx) foi gerado pela aplicação com essa configuração. Ele permite comparar os valores com os resultados esperados abaixo.
+Essas etapas usam a mesma configuração do Excel apresentado acima. Compare as tabelas geradas com os resultados esperados abaixo.
 
 ### Resultados esperados
 
@@ -82,6 +84,20 @@ Colunas adicionais são preservadas e podem ser usadas nas contagens ou na segme
 
 O extrator detecta nomes iniciados por `tag_` e espera `tag_nome:valor |`. **Inclua o delimitador `|` também depois da última tag**: o extrator atual não captura o último valor sem esse delimitador.
 
+Antes do upload, confira os cabeçalhos e preencha os identificadores de atendimento e usuário. Identificações ausentes podem afetar a contagem de usuários únicos. Use datas válidas: valores não reconhecidos tornam-se ausentes e ficam fora dos indicadores mensais; uma entrada sem datas válidas pode falhar no processamento.
+
+## Experimente uma cópia do CSV
+
+Na raiz do projeto, crie uma cópia para modificar:
+
+```bash
+cp examples/atendimentos_sinteticos.csv atendimentos-experimento.csv
+```
+
+Edite a cópia mantendo **latin1 (ISO-8859-1)**, o separador `;`, os quatro cabeçalhos e o delimitador `|` após cada tag. Ao exportar de um editor ou planilha, selecione explicitamente essa codificação e esse separador. Use identificadores fictícios novos para acrescentar atendimentos; repetir `Id. Atendimento` conserva somente a primeira ocorrência.
+
+Faça upload da cópia e clique em **Processar Arquivos**. Para experimentar outra análise, escolha `tag_status` em **Tag para análise**, `Id. Atendimento` em **Coluna para contar** e `Período` na segmentação. Clique em **Adicionar Análise** e em **Gerar Excel com Análises** para obter a nova saída.
+
 ## Indicadores e contagens
 
 Os indicadores seguem estas definições:
@@ -102,17 +118,9 @@ O Excel contém três abas:
 - **`U.U e Rec`:** indicadores mensais. Percentuais e médias são armazenados como texto formatado, por exemplo `150.00%` e `2.50`.
 - **`resumo`:** tabelas das análises configuradas e gráficos nativos de barras/colunas. Os agregados identificados exatamente como `TOTAL` ficam nas tabelas e são excluídos dos gráficos; categorias como `perda total` são preservadas. É necessário adicionar pelo menos uma análise para gerar o arquivo pela interface.
 
+Abra o arquivo em um editor compatível com `.xlsx`. A aparência e a edição dos gráficos dependem do editor de planilhas; compare os valores das tabelas com as prévias do exemplo.
+
 Os uploads são lidos em memória. Quando os arquivos mudam, inclusive com **nomes iguais e conteúdos diferentes**, os dados processados, análises e Excel anteriores são descartados: processe e configure novamente. Remover os uploads também limpa esses resultados. Reprocessar a mesma entrada reinicia as análises; adicionar ou remover uma análise exige gerar o Excel novamente. O link de download permanece válido entre reruns da mesma sessão.
-
-## Limitações conhecidas
-
-- Não há validação completa de esquema ou de qualidade de dados. Cabeçalhos ausentes e arquivos em outro formato podem causar erro.
-- Datas inválidas são convertidas em ausentes e ficam fora dos indicadores mensais; se todas forem inválidas, o processamento pode falhar. Use datas válidas e identificadores preenchidos, como no exemplo.
-- Identificações ausentes não são rejeitadas explicitamente e podem afetar a contagem de usuários únicos. Preencha os identificadores antes de importar os dados.
-- A última tag exige `|`; nomes, delimitadores e codificação seguem o contrato atual do CSV.
-- Os gráficos exibem as categorias e os segmentos, sem os agregados `TOTAL`. Quando a contagem usa identificadores presentes em vários segmentos, a soma das parcelas pode diferir do total distinto da tabela.
-- O Excel usa gráficos nativos de `.xlsx`; a aparência e a edição dependem do editor de planilhas. Use as tabelas de resultados esperados para conferir os valores.
-- As dependências têm limites mínimos, sem lockfile de ambiente; versões diferentes do ambiente de referência podem apresentar diferenças de compatibilidade.
 
 ## Testes
 
